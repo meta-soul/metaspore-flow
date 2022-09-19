@@ -13,22 +13,3 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-from .flow_executor import FlowExecutor
-
-class LocalFlowExecutor(FlowExecutor):
-    async def execute_up(self):
-        print(self._resources)
-        print('local flow up')
-
-    async def execute_down(self):
-        print(self._resources)
-        print('local flow down')
-
-    async def execute_status(self):
-        print(self._resources)
-        print('local flow status')
-
-    async def execute_reload(self):
-        print(self._resources)
-        print('local flow reload')
