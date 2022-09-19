@@ -14,18 +14,17 @@
 # limitations under the License.
 #
 
-class FlowExecutor(object):
-    def __init__(self, resources):
-        self._resources = resources
+from .flow_executor import FlowExecutor
 
+class LocalFlowExecutor(FlowExecutor):
     async def execute_up(self):
-        raise NotImplementedError
+        print('local flow up')
 
     async def execute_down(self):
-        raise NotImplementedError
-
-    async def execute_update(self):
-        raise NotImplementedError
+        print('local flow down')
 
     async def execute_status(self):
-        raise NotImplementedError
+        print('local flow status')
+
+    async def execute_reload(self):
+        print('local flow reload')
