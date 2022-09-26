@@ -1,30 +1,26 @@
 from typing import Dict, Tuple
 import subprocess
 
-from metasporeflow.executors.local_flow_executor import LocalFlowExecutor
 from metasporeflow.flows.metaspore_oflline_flow import OfflineScheduler, OfflineTask
-from metasporeflow.offline.scheduler.crontab_scheduler import CrontabScheduler, \
+from metasporeflow.offline.scheduler.offline_crontab_scheduler import OfflineCrontabScheduler, \
     METASPORE_OFFLINE_FLOW_LOCAL_CONTAINER_NAME
 from metasporeflow.offline.scheduler.scheduler import Scheduler
 from metasporeflow.offline.task.offline_python_task import OfflinePythonTask
 from metasporeflow.offline.task.task import Task
 from metasporeflow.resources.resource import Resource
 
-_SCHEDULER_TYPES = {'Crontab': CrontabScheduler}
+_SCHEDULER_TYPES = {'OfflineCrontabScheduler': OfflineCrontabScheduler}
 _TASK_TYPES = {'OfflinePythonTask': OfflinePythonTask}
 
 
-class LocalOfflineFlowExecutor(LocalFlowExecutor):
-    def _initialize_(self):
-
-        self._schedulers_conf: Tuple[Resource] = self._resources.find_all(OfflineScheduler)
-        self._tasks_conf: Tuple[Resource] = self._resources.find_all(OfflineTask)
+class LocalOfflineFlowExecutor():
+    def __init__(self, resources):
+        self._schedulers_conf: Tuple[Resource] = resources.find_all(OfflineScheduler)
+        self._tasks_conf: Tuple[Resource] = resources.find_all(OfflineTask)
         self._tasks: Dict[str, Task] = self._get_tasks(self._tasks_conf)
         self._schedulers: LocalOfflineFlowExecutor.Schedulers = self.Schedulers(self._schedulers_conf,
                                                                                 self._tasks)
-
-    async def execute_up(self):
-        self._initialize_()
+    def execute_up(self):
         self._schedulers.start()
 
     def _get_tasks(self, tasks_conf) -> Dict[str, Task]:

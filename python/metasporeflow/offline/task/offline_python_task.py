@@ -16,5 +16,4 @@ class OfflinePythonTask(Task):
         self._config_path = data.configPath
 
     def _execute(self):
-        pass
-        # return "python %s %s" % (self._script_path, self.customer_params_yaml_file)
+        return "python %s --conf %s" % (self._script_path, self._config_path)

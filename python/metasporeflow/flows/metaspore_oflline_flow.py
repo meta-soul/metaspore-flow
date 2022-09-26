@@ -20,7 +20,7 @@ from typing import Tuple, Dict
 
 @frozen
 class OfflineScheduler:
-    cron_expr: str
+    cronExpr: str
     dag: Dict[str, Tuple[str]]
 
 @frozen

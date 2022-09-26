@@ -14,12 +14,18 @@
 # limitations under the License.
 #
 
+from metasporeflow.offline.local_offline_executor import LocalOfflineFlowExecutor
 from .flow_executor import FlowExecutor
+import asyncio
 
 class LocalFlowExecutor(FlowExecutor):
     async def execute_up(self):
         print(self._resources)
         print('local flow up')
+        print('-------------------------------')
+        print('offline local flow up')
+        flow_executor = LocalOfflineFlowExecutor(self._resources)
+        flow_executor.execute_up()
 
     async def execute_down(self):
         print(self._resources)

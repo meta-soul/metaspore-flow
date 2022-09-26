@@ -16,6 +16,7 @@ dependencies = [
     "attrs~=22.1.0",
     "cattrs~=22.1.0",
     "PyYAML~=5.4.1",
+    "networkx~=2.8.6",
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
