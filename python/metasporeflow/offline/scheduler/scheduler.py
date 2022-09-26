@@ -3,17 +3,15 @@ from typing import Dict, List
 
 import networkx as nx
 
-from task.task import Task
+from metasporeflow.offline.task.task import Task
 
 
 class Scheduler(ABC):
-    def __init__(self, schedulers_conf, tasks: Dict[str, Task], customer_conf_path):
-        self.name = schedulers_conf['name']
-        self.type = schedulers_conf['type']
-        self.cronExpr = schedulers_conf['cronExpr']
-        self._customer_conf_path = customer_conf_path
-        self._dag = self._get_dag(schedulers_conf['dag'])
-        # self._tasks: Dict[str, Task] = tasks
+    def __init__(self, scheduler_conf, tasks: Dict[str, Task]):
+        self.name = scheduler_conf.name
+        self.type = scheduler_conf.kind
+        self.cronExpr = scheduler_conf.data.cronExpr
+        self._dag = self._get_dag(scheduler_conf.data.dag)
         self._dag_tasks: List[Task] = self._get_dag_tasks(tasks)
 
     @abstractmethod

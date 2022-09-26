@@ -6,21 +6,17 @@ class Task(ABC):
     def __init__(self,
                  name,
                  type,
-                 meta,
-                 customer_params,
-                 customer_conf_path
+                 data
                  ):
         self._name = name
         self._type = type
-        self._meta = meta
-        self._script_path = meta['scriptPath']
-        self._customer_params = customer_params
-        self._customer_conf_path: str = customer_conf_path
+        self._data = data
 
     def __repr__(self):
-        return '%s(%s, %s)' % (self.__class__.__name__,
+        return '%s(%s, %s, %s)' % (self.__class__.__name__,
                                self._name,
-                               self._type)
+                               self._type,
+                               self._data)
 
     @abstractmethod
     def _execute(self):
@@ -35,22 +31,9 @@ class Task(ABC):
         return self._type
 
     @property
-    def meta(self):
-        return self._meta
-
-    @property
-    def customer_params(self):
-        return self._customer_params
+    def data(self):
+        return self._data
 
     @property
     def execute(self):
         return self._execute()
-
-    @property
-    def customer_params_yaml_file(self) -> str:
-        return self._generate_customer_params_yaml_file_path()
-
-    def _generate_customer_params_yaml_file_path(self) -> str:
-        yaml_path = self._customer_conf_path + '/'
-        yaml_path += self._name + '.yml'
-        return yaml_path

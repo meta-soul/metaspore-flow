@@ -1,16 +1,27 @@
+from typing import Tuple
+
 from metasporeflow.flows.flow_loader import FlowLoader
 from metasporeflow.flows.metaspore_oflline_flow import OfflineScheduler, OfflineTask
+from metasporeflow.offline.local_offline_executor import LocalOfflineFlowExecutor
 
 flow_loader = FlowLoader()
 resources = flow_loader.load()
-# flow_executor = LocalOfflineFlowExecutor(resources)
 
 schedulers = resources.find_all(OfflineScheduler)
 tasks = resources.find_all(OfflineTask)
+print(type(schedulers))
 
 for scheduler in schedulers:
-    print(scheduler.name)
-    print(scheduler)
+    print(type(scheduler))
+    print(scheduler.data)
 
 for task in tasks:
     print(task.name)
+    print(task.kind)
+    print(task.path)
+    print(task.data)
+
+import asyncio
+
+flow_executor = LocalOfflineFlowExecutor(resources)
+asyncio.run(flow_executor.execute_up())

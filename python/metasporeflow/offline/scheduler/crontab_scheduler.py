@@ -1,25 +1,19 @@
-from scheduler.scheduler import Scheduler
-from utils.file_util import FileUtil
 import os
 import subprocess
 
+from metasporeflow.offline.local_offline_executor import METASPORE_OFFLINE_FLOW_LOCAL_CONTAINER_NAME
+from metasporeflow.offline.scheduler.scheduler import Scheduler
+from metasporeflow.offline.utils.file_util import FileUtil
+
 
 class CrontabScheduler(Scheduler):
-    def __init__(self, schedulers_conf, tasks, customer_conf_path):
-        super().__init__(schedulers_conf, tasks, customer_conf_path)
+    def __init__(self, schedulers_conf, tasks):
+        super().__init__(schedulers_conf, tasks)
         self._local_temp_dir = ".tmp"
-        self.is_local_mode = True
-        self._container_name = 'metaspore_offline'
-        self._is_offline_container_running = True
+        self._docker_temp_dir = "/opt" + "/" + self._local_temp_dir
+        self._container_name = METASPORE_OFFLINE_FLOW_LOCAL_CONTAINER_NAME
 
     def publish(self):
-
-        if not self.is_local_mode:
-            return
-
-        if not self._is_offline_container_running:
-            return
-
         self._write_local_tmp_dir()
 
         self._copy_tmp_to_docker_container()
@@ -38,22 +32,11 @@ class CrontabScheduler(Scheduler):
         return self._local_temp_dir + "/" + self.name + ".sh"
 
     @property
-    def _docker_tmp_dir(self):
-        return self._customer_conf_path + "/" + self._local_temp_dir
-
-    @property
     def _docker_crontab_script_file(self):
-        return self._docker_tmp_dir + "/" + self.name + ".sh"
+        return self._docker_temp_dir + "/" + self.name + ".sh"
 
     def _write_local_tmp_dir(self):
-        self._write_customer_params_files()
         self._write_crontab_script()
-
-    def _write_customer_params_files(self):
-        for task in self._dag_tasks:
-            customer_params_yaml_file = self._local_temp_dir + "/" + task.name + ".yml"
-            FileUtil.write_dict_to_yaml_file(
-                customer_params_yaml_file, task.customer_params)
 
     def _write_crontab_script(self):
         content = self._generate_crontab_script_content()
@@ -64,16 +47,16 @@ class CrontabScheduler(Scheduler):
         scheduler_time = 'SCHEDULER_TIME="`date --iso-8601=seconds`"' + "\n"
         cmd = self._generate_cmd()
         script_content = script_header + \
-            scheduler_time + \
-            cmd
+                         scheduler_time + \
+                         cmd
         return script_content
 
     def _copy_tmp_to_docker_container(self):
         src = self._local_temp_dir + "/."
         dst = "%s:%s/" % (self._container_name,
-                          self._docker_tmp_dir)
+                          self._docker_temp_dir)
         overwrite_docker_tmp_dir = "rm -rf %s && mkdir -p %s " % (
-            self._docker_tmp_dir, self._docker_tmp_dir)
+            self._docker_temp_dir, self._docker_temp_dir)
 
         overwrite_docker_tmp_dir_cmd = ['docker', 'exec', '-i', self._container_name,
                                         '/bin/bash', '-c', overwrite_docker_tmp_dir]

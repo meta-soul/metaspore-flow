@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 
+
 class FlowLoader(object):
     _NAMESPACE = 'metaspore'
     _FILE_NAME = 'metaspore-flow.yml'
@@ -27,8 +28,18 @@ class FlowLoader(object):
     @classmethod
     def _get_resource_types(cls):
         from .metaspore_flow import MetaSporeFlow
+        from metasporeflow.flows.metaspore_oflline_flow import \
+            OfflineScheduler, \
+            OfflineCrontabScheduler, \
+            OfflineTask, \
+            OfflinePythonTask
         resource_types = (
             MetaSporeFlow,
+            OfflineScheduler,
+            OfflineCrontabScheduler,
+            OfflineTask,
+            OfflinePythonTask
+
         )
         return resource_types
 
