@@ -1,8 +1,6 @@
-from typing import Tuple
-
+from metasporeflow.executors.local_offline_executor import LocalOfflineFlowExecutor
 from metasporeflow.flows.flow_loader import FlowLoader
 from metasporeflow.flows.metaspore_oflline_flow import OfflineScheduler, OfflineTask
-from metasporeflow.offline.local_offline_executor import LocalOfflineFlowExecutor
 
 flow_loader = FlowLoader()
 resources = flow_loader.load()
