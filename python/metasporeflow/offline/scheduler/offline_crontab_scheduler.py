@@ -22,8 +22,10 @@ class OfflineCrontabScheduler(Scheduler):
         self._exec_docker_crontab_script()
 
     def _generate_cmd(self):
-        cmd = map(lambda x: x.execute +
-                  " --scheduler_time ${SCHEDULER_TIME}", self._dag_tasks)
+        ## 2022年9月27日 remove --scheduler_time for local model
+        # cmd = map(lambda x: x.execute +
+        #           " --scheduler_time ${SCHEDULER_TIME}", self._dag_tasks)
+        cmd = map(lambda x: x.execute, self._dag_tasks)
         cmd = " \n".join(cmd)
         return cmd
 
@@ -44,9 +46,11 @@ class OfflineCrontabScheduler(Scheduler):
 
     def _generate_crontab_script_content(self):
         script_header = "#!/bin/bash" + "\n"
+        exec_path = "cd /opt/ecommerce_demo/MetaSpore\n"
         scheduler_time = 'SCHEDULER_TIME="`date --iso-8601=seconds`"' + "\n"
         cmd = self._generate_cmd()
         script_content = script_header + \
+            exec_path + \
             scheduler_time + \
             cmd
         return script_content
@@ -90,8 +94,8 @@ class OfflineCrontabScheduler(Scheduler):
     #     print(msg)
 
     def _exec_docker_crontab_script(self):
-        exec_docker_crontab_script_msg = "sh %s > /tmp/%s.log" % (
-            self._docker_crontab_script_file, self.name)
+        exec_docker_crontab_script_msg = "sh %s " % (
+            self._docker_crontab_script_file)
         msg = "[trigger scheduler once]: \n" + \
             "scheduler name: %s \n" % (self.name,) + \
             "cmd : %s" % (exec_docker_crontab_script_msg)
