@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from online.online_flow import OnlineFlow
+
 
 class FlowLoader(object):
     _NAMESPACE = 'metaspore'
@@ -29,6 +31,7 @@ class FlowLoader(object):
         from .metaspore_flow import MetaSporeFlow
         resource_types = (
             MetaSporeFlow,
+            OnlineFlow,
         )
         return resource_types
 

@@ -13,22 +13,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+from online.online_executor import OnlineExecutor
 from .flow_executor import FlowExecutor
 
 class LocalFlowExecutor(FlowExecutor):
+    def __init__(self):
+        self.online_executor = OnlineExecutor(self._resources)
+
     async def execute_up(self):
         print(self._resources)
         print('local flow up')
+        self.online_executor.execute_up()
 
     async def execute_down(self):
         print(self._resources)
         print('local flow down')
+        self.online_executor.execute_down()
 
     async def execute_status(self):
         print(self._resources)
         print('local flow status')
+        self.online_executor.execute_status()
 
     async def execute_reload(self):
         print(self._resources)
         print('local flow reload')
+        self.online_executor.execute_reload()

@@ -14,12 +14,11 @@
 # limitations under the License.
 #
 import subprocess
-import time
 
 from cloud_consul import putServiceConfig
-from online_flow import DataSource, FeatureInfo, CFModelInfo, OnlineFlow
+from online_flow import OnlineFlow
 from online_generator import OnlineGenerator, get_demo_jpa_flow
-from enum import Enum
+
 
 def run_cmd(command):
     ret = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8")
@@ -27,9 +26,9 @@ def run_cmd(command):
 
 
 class OnlineExecutor(object):
-    def __init__(self, config):
-        self._config = config
-        self._generator = OnlineGenerator(configure=config)
+    def __init__(self, resources):
+        self._config = resources.find_by_type(OnlineFlow)
+        self._generator = OnlineGenerator(configure=self._config)
 
     def execute_up(self, **kwargs):
         docker_compose_yaml = kwargs.setdefault("docker_compose_file", "docker_compose.yml")
