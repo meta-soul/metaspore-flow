@@ -19,5 +19,4 @@ from attrs import frozen
 @frozen
 class MetaSporeFlow:
     # TODO: demo
-    input_table_name: str
-    output_table_name: str
+    sharedVolumeInContainer: str

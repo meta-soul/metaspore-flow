@@ -17,6 +17,10 @@
 from attrs import frozen
 from typing import Tuple, Dict
 
+@frozen
+class OfflineLocalFlow:
+    offlineLocalImage: str
+    offlineLocalContainerName: str
 
 @frozen
 class OfflineScheduler:

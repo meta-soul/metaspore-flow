@@ -3,12 +3,11 @@ import subprocess
 from metasporeflow.offline.scheduler.scheduler import Scheduler
 from metasporeflow.offline.utils.file_util import FileUtil
 
-METASPORE_OFFLINE_FLOW_LOCAL_CONTAINER_NAME = "metaspore_offline_flow"
-
 
 class OfflineCrontabScheduler(Scheduler):
-    def __init__(self, schedulers_conf, tasks):
+    def __init__(self, schedulers_conf, tasks, local_container_name):
         super().__init__(schedulers_conf, tasks)
+        self._local_container_name = local_container_name
         self._local_temp_dir = ".tmp"
         self._docker_temp_dir = "/opt" + "/" + self._local_temp_dir
 
@@ -22,7 +21,7 @@ class OfflineCrontabScheduler(Scheduler):
         self._exec_docker_crontab_script()
 
     def _generate_cmd(self):
-        ## 2022年9月27日 remove --scheduler_time for local model
+        # 2022年9月27日 remove --scheduler_time for local model
         # cmd = map(lambda x: x.execute +
         #           " --scheduler_time ${SCHEDULER_TIME}", self._dag_tasks)
         cmd = map(lambda x: x.execute, self._dag_tasks)
@@ -46,7 +45,7 @@ class OfflineCrontabScheduler(Scheduler):
 
     def _generate_crontab_script_content(self):
         script_header = "#!/bin/bash" + "\n"
-        exec_path = "cd /opt/ecommerce_demo/MetaSpore\n"
+        exec_path = "cd /opt/volumes/ecommerce_demo/MetaSpore\n"
         scheduler_time = 'SCHEDULER_TIME="`date --iso-8601=seconds`"' + "\n"
         cmd = self._generate_cmd()
         script_content = script_header + \
@@ -57,12 +56,12 @@ class OfflineCrontabScheduler(Scheduler):
 
     def _copy_tmp_to_docker_container(self):
         src = self._local_temp_dir + "/."
-        dst = "%s:%s/" % (METASPORE_OFFLINE_FLOW_LOCAL_CONTAINER_NAME,
+        dst = "%s:%s/" % (self._local_container_name,
                           self._docker_temp_dir)
         overwrite_docker_tmp_dir = "rm -rf %s && mkdir -p %s " % (
             self._docker_temp_dir, self._docker_temp_dir)
 
-        overwrite_docker_tmp_dir_cmd = ['docker', 'exec', '-i', METASPORE_OFFLINE_FLOW_LOCAL_CONTAINER_NAME,
+        overwrite_docker_tmp_dir_cmd = ['docker', 'exec', '-i', self._local_container_name,
                                         '/bin/bash', '-c', overwrite_docker_tmp_dir]
         copy_tmp_to_docker_cmd = ['docker', 'cp', src, dst]
 
@@ -77,7 +76,7 @@ class OfflineCrontabScheduler(Scheduler):
         print("[publish crontab]: \n" +
               "scheduler name: %s \ncrontab_cmd: %s" % (self.name, crontab_cmd))
 
-        publish_docker_crontab_cmd = ['docker', 'exec', '-i', METASPORE_OFFLINE_FLOW_LOCAL_CONTAINER_NAME,
+        publish_docker_crontab_cmd = ['docker', 'exec', '-i', self._local_container_name,
                                       '/bin/bash', '-c', publish_crontab_msg]
 
         subprocess.run(publish_docker_crontab_cmd)
@@ -85,7 +84,7 @@ class OfflineCrontabScheduler(Scheduler):
 
     # def _get_crontab_list(self):
     #     get_crontab_list = 'crontab -l'
-    #     get_crontab_list_cmd = ['docker', 'exec', '-i', METASPORE_OFFLINE_FLOW_LOCAL_CONTAINER_NAME,
+    #     get_crontab_list_cmd = ['docker', 'exec', '-i', self._local_container_name,
     #                             '/bin/bash', '-c', get_crontab_list]
     #     res = subprocess.run(get_crontab_list_cmd,
     #                          capture_output=True,
@@ -100,6 +99,6 @@ class OfflineCrontabScheduler(Scheduler):
             "scheduler name: %s \n" % (self.name,) + \
             "cmd : %s" % (exec_docker_crontab_script_msg)
         print(msg)
-        exec_docker_crontab_script_cmd = ['docker', 'exec', '-i', METASPORE_OFFLINE_FLOW_LOCAL_CONTAINER_NAME,
+        exec_docker_crontab_script_cmd = ['docker', 'exec', '-i', self._local_container_name,
                                           '/bin/bash', '-c', exec_docker_crontab_script_msg]
         subprocess.run(exec_docker_crontab_script_cmd)

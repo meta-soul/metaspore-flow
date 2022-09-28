@@ -32,13 +32,15 @@ class FlowLoader(object):
             OfflineScheduler, \
             OfflineCrontabScheduler, \
             OfflineTask, \
-            OfflinePythonTask
+            OfflinePythonTask, \
+            OfflineLocalFlow
         resource_types = (
             MetaSporeFlow,
             OfflineScheduler,
             OfflineCrontabScheduler,
             OfflineTask,
-            OfflinePythonTask
+            OfflinePythonTask,
+            OfflineLocalFlow,
 
         )
         return resource_types
