@@ -13,23 +13,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from typing import Optional
+
 from attrs import frozen
-from attrs import field
 
 
 @frozen
 class DockerInfo(object):
-    image: str
-    environment: dict
+    image: Optional[str] = None
+    environment: Optional[dict] = dict()
 
 
 @frozen
 class ServiceInfo(object):
-    host: str
-    port: int
-    kind: str
-    collection: list
-    options: dict
+    host: Optional[str] = "172.17.0.1"
+    port: Optional[int] = 27017
+    kind: Optional[str] = "mongodb"
+    collection: Optional[list] = list()
+    options: Optional[dict] = dict()
 
 
 @frozen
@@ -37,7 +38,7 @@ class DataSource(object):
     table: str
     serviceName: str
     collection: str
-    columns: list
+    columns: Optional[list] = None
 
 
 @frozen
@@ -102,7 +103,7 @@ class OnlineFlow(object):
     twotower_models: list
     rank_models: list
     services: dict
-    dockers: dict
+    dockers: Optional[dict] = None
 
 
 
