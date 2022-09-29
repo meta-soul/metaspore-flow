@@ -13,12 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from cloud_consul import putServiceConfig
-from common import DumpToYaml
-from compose_config import OnlineDockerCompose
-from online_flow import OnlineFlow, ServiceInfo, DataSource, FeatureInfo, CFModelInfo, RankModelInfo, DockerInfo, \
+from .cloud_consul import putServiceConfig
+from .common import DumpToYaml
+from .compose_config import OnlineDockerCompose
+from .online_flow import OnlineFlow, ServiceInfo, DataSource, FeatureInfo, CFModelInfo, RankModelInfo, DockerInfo, \
     RandomModelInfo, CrossFeature
-from service_config import get_source_option, Source, Condition, FieldAction, \
+from .service_config import get_source_option, Source, Condition, FieldAction, \
     FeatureConfig, RecommendConfig, TransformConfig, Chain, ExperimentItem, OnlineServiceConfig
 
 
@@ -167,8 +167,8 @@ class OnlineGenerator(object):
                                          fieldActions=user_profile_actions, output=[user_key, item_key, "item_score"])
         recall_services = list()
         recall_experiments = list()
-        if self.configure.random_model:
-            model_info = self.configure.random_model
+        if self.configure.random_models:
+            model_info = self.configure.random_models[0]
             if not model_info.name:
                 raise ValueError("random_model model name must not be empty")
             key_name = "key"

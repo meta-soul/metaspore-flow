@@ -17,7 +17,7 @@ from attrs import define
 from attrs import field
 from typing import Literal
 
-from common import BaseDefaultConfig
+from .common import BaseDefaultConfig
 from urllib.parse import quote_plus
 
 

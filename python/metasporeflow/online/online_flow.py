@@ -98,7 +98,7 @@ class FeatureInfo(object):
 @frozen
 class OnlineFlow(object):
     source: FeatureInfo
-    random_model: RankModelInfo
+    random_models: list
     cf_models: list
     twotower_models: list
     rank_models: list

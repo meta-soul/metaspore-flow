@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from online.online_flow import OnlineFlow
+from ..online.online_flow import OnlineFlow
 
 
 class FlowLoader(object):

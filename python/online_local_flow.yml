@@ -47,13 +47,13 @@ spec:
     request:
       - user_id: str
       - item_id: str
-  random_model:
-    name: pop
-    bound: 10
-    source:
-      table: amazonfashion_pop
-      serviceName: mongo
-      collection: jpa
+  random_models:
+    - name: pop
+      bound: 10
+      source:
+        table: amazonfashion_pop
+        serviceName: mongo
+        collection: jpa
   cf_models:
     - name: swing
       source:

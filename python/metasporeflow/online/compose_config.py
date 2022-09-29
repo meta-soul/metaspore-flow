@@ -17,7 +17,7 @@ from attrs import define
 from attrs import field
 from typing import Literal
 
-from common import DumpToYaml, S, BaseDefaultConfig
+from .common import DumpToYaml, S, BaseDefaultConfig
 
 
 @define
