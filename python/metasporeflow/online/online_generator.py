@@ -311,6 +311,7 @@ class OnlineGenerator(object):
                 cross_features = list()
                 if model_info.cross_features:
                     for cross_item in model_info.cross_features:
+                        cross_item = dictToObj(cross_item)
                         cross_features.append(cross_item.name)
                         field_actions.append(FieldAction(names=[cross_item.name],
                                                          types=["str"],
