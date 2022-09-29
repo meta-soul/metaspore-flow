@@ -63,7 +63,9 @@ class Dict(dict):
 
 def setDefault(data, key, value):
     if not isinstance(data, Dict):
-        return None
+        if not hasattr(data, key) or not getattr(data, key):
+            setattr(data, key, value)
+        return getattr(data, key)
     if not data:
         data = Dict()
     if key not in data or not data[key]:
