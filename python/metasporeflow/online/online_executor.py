@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 import subprocess
+import time
 
 from .cloud_consul import putServiceConfig
 from .online_flow import OnlineFlow
@@ -37,6 +38,7 @@ class OnlineLocalExecutor(object):
         docker_compose.write(compose_content)
         docker_compose.close()
         if run_cmd(["docker-compose -f %s up -d" % docker_compose_yaml]) == 0:
+            time.sleep(1)
             online_recommend_config = self._generator.gen_server_config()
             putServiceConfig(online_recommend_config)
             print("online flow up success!")
