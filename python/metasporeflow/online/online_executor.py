@@ -33,7 +33,7 @@ class OnlineLocalExecutor(object):
         self._generator = OnlineGenerator(resource=self._resource)
 
     def execute_up(self, **kwargs):
-        docker_compose_yaml = kwargs.setdefault("docker_compose_file", "docker_compose.yml")
+        docker_compose_yaml = kwargs.setdefault("docker_compose_file", "docker-compose.yml")
         compose_content = self._generator.gen_docker_compose()
         docker_compose = open(docker_compose_yaml, "w")
         docker_compose.write(compose_content)
