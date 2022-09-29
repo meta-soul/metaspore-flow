@@ -18,7 +18,8 @@ from ..online.online_executor import OnlineLocalExecutor
 
 
 class LocalFlowExecutor(FlowExecutor):
-    def __init__(self):
+    def __init__(self, resources):
+        super(LocalFlowExecutor, self).__init__(resources)
         self.online_executor = OnlineLocalExecutor(self._resources)
 
     async def execute_up(self):
