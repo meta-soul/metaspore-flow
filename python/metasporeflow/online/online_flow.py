@@ -97,12 +97,12 @@ class FeatureInfo(object):
 
 @frozen
 class OnlineFlow(object):
-    source: FeatureInfo
-    random_models: list
-    cf_models: list
-    twotower_models: list
-    rank_models: list
-    services: dict
+    source: Optional[FeatureInfo] = None
+    random_models: Optional[list] = None
+    cf_models: Optional[list] = None
+    twotower_models: Optional[list] = None
+    rank_models: Optional[list] = None
+    services: Optional[dict] = None
     dockers: Optional[dict] = None
 
 
