@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 from .cloud_consul import putServiceConfig
-from .common import DumpToYaml, dictToObj
+from .common import DumpToYaml, dictToObj, setDefault
 from .compose_config import OnlineDockerCompose
 from .online_flow import OnlineFlow, ServiceInfo, DataSource, FeatureInfo, CFModelInfo, RankModelInfo, DockerInfo, \
     RandomModelInfo, CrossFeature
@@ -30,9 +30,7 @@ def append_source_table(feature_config, name, datasource, default_columns=[]):
         source_name = "%s_%s" % (datasource.serviceName, datasource.collection)
     if not feature_config.find_source(source_name):
         raise ValueError("source: %s must set in services!" % source_name)
-    columns = datasource.columns
-    if not columns:
-        columns = default_columns
+    columns = setDefault(datasource, "columns", default_columns)
     if not columns:
         raise ValueError("ds columns must not be empty")
     feature_config.add_sourceTable(name=name, source=source_name, table=datasource.table,

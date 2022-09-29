@@ -61,6 +61,14 @@ class Dict(dict):
     __getattr__ = dict.__getitem__
 
 
+def setDefault(data, key, value):
+    if not data:
+        data = Dict()
+    if key not in data or not data[key]:
+        data[key] = value
+    return data[key]
+
+
 def dictToObj(obj):
     if not isinstance(obj, dict):
         return obj
