@@ -23,13 +23,14 @@ from .online_generator import OnlineGenerator, get_demo_jpa_flow
 
 def run_cmd(command):
     ret = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8")
+    print(ret)
     return ret.returncode
 
 
 class OnlineLocalExecutor(object):
     def __init__(self, resources):
-        self._config = resources.find_by_type(OnlineFlow)
-        self._generator = OnlineGenerator(configure=self._config)
+        self._resource = resources.find_by_type(OnlineFlow)
+        self._generator = OnlineGenerator(resource=self._resource)
 
     def execute_up(self, **kwargs):
         docker_compose_yaml = kwargs.setdefault("docker_compose_file", "docker_compose.yml")
@@ -55,11 +56,15 @@ class OnlineLocalExecutor(object):
         pass
 
     def execute_reload(self, **kwargs):
-        new_flow = kwargs.setdefault("configure", None)
-        self._config = new_flow
-        self._generator = OnlineGenerator(configure=self._config)
-        self.execute_down(**kwargs)
-        self.execute_up(**kwargs)
+        new_flow = kwargs.setdefault("resource", None)
+        if not new_flow:
+            print("config update to None")
+            self.execute_down(**kwargs)
+        else:
+            self._resource = new_flow
+            self._generator = OnlineGenerator(resource=self._resource)
+            self.execute_down(**kwargs)
+            self.execute_up(**kwargs)
         print("online flow reload success!")
 
 

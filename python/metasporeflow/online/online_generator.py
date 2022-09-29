@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 from .cloud_consul import putServiceConfig
-from .common import DumpToYaml
+from .common import DumpToYaml, dictToObj
 from .compose_config import OnlineDockerCompose
 from .online_flow import OnlineFlow, ServiceInfo, DataSource, FeatureInfo, CFModelInfo, RankModelInfo, DockerInfo, \
     RandomModelInfo, CrossFeature
@@ -50,9 +50,10 @@ def columns_has_key(columns, key):
 
 class OnlineGenerator(object):
     def __init__(self, **kwargs):
-        self.configure = kwargs.get("configure")
-        if not self.configure or not isinstance(self.configure, OnlineFlow):
+        self.resource = kwargs.get("resource")
+        if not self.resource or not isinstance(self.resource.data, OnlineFlow):
             raise ValueError("MetaSpore Online need input online configure data!")
+        self.configure = self.resource.data
 
     def gen_docker_compose(self):
         online_docker_compose = OnlineDockerCompose()
@@ -60,7 +61,7 @@ class OnlineGenerator(object):
         if self.configure.dockers:
             dockers.update(self.configure.dockers)
         if "recommend" not in dockers:
-            dockers["recommend"] = DockerInfo("dmetasoul/recommend-service-11:1.0", {})
+            dockers["recommend"] = DockerInfo("swr.cn-southwest-2.myhuaweicloud.com/dmetasoul-repo/recommend-service-11:1.0", {})
         no_mode_service = True
         for name in dockers.keys():
             if str(name).startswith("model"):
@@ -71,6 +72,7 @@ class OnlineGenerator(object):
                 DockerInfo("swr.cn-southwest-2.myhuaweicloud.com/dmetasoul-public/metaspore-serving-release:cpu-v1.0.1",
                            {})
         for name, info in dockers.items():
+            info = dictToObj(info)
             online_docker_compose.add_service(name, "container_%s_service" % name,
                                               image=info.image, environment=info.environment)
         online_recommend_service = online_docker_compose.services.get("recommend")
@@ -78,6 +80,7 @@ class OnlineGenerator(object):
             raise ValueError("container_recommend_service init fail!")
         if online_docker_compose.services:
             for name, service in online_docker_compose.services.items():
+                service = dictToObj(service)
                 if name == "recommend" or not service.ports:
                     continue
                 online_recommend_service.add_env("%s_HOST" % name.upper(), name)
@@ -90,6 +93,7 @@ class OnlineGenerator(object):
         if not self.configure.services:
             raise ValueError("services must set!")
         for name, info in self.configure.services.items():
+            info = dictToObj(info)
             if not info.collection:
                 feature_config.add_source(name=name, kind=info.kind,
                                           options=get_source_option(self.configure, name, None))
@@ -100,6 +104,7 @@ class OnlineGenerator(object):
         feature_info = self.configure.source
         if not feature_info:
             raise ValueError("feature_info must set!")
+        feature_info = dictToObj(feature_info)
         append_source_table(feature_config, "source_table_user", feature_info.user)
         append_source_table(feature_config, "source_table_item", feature_info.item)
         user_key = feature_info.user_key_name or "user_id"
@@ -171,6 +176,7 @@ class OnlineGenerator(object):
             model_info = self.configure.random_models[0]
             if not model_info.name:
                 raise ValueError("random_model model name must not be empty")
+            model_info = dictToObj(model_info)
             key_name = "key"
             value_name = "value_list"
             append_source_table(feature_config, model_info.name, model_info.source,
@@ -225,6 +231,7 @@ class OnlineGenerator(object):
             recall_services.append(service_name)
         if self.configure.cf_models:
             for model_info in self.configure.cf_models:
+                model_info = dictToObj(model_info)
                 if not model_info.name:
                     raise ValueError("cf_models model name must not be empty")
                 append_source_table(feature_config, model_info.name, model_info.source,
@@ -285,6 +292,7 @@ class OnlineGenerator(object):
         rank_experiments = list()
         if self.configure.rank_models:
             for model_info in self.configure.rank_models:
+                model_info = dictToObj(model_info)
                 if not model_info.name or not model_info.model:
                     raise ValueError("rank_models model name or model must not be empty")
                 feature_name = "feature_%s" % model_info.name

@@ -54,3 +54,17 @@ def DumpToYaml(obj):
     if isinstance(obj, BaseConfig):
         return ruamel.yaml.round_trip_dump(obj.to_dict(), width=160)
     return ruamel.yaml.round_trip_dump(Object2Dict(obj), width=160)
+
+
+class Dict(dict):
+    __setattr__ = dict.__setitem__
+    __getattr__ = dict.__getitem__
+
+
+def dictToObj(obj):
+    if not isinstance(obj, dict):
+        return obj
+    data = Dict()
+    for k, v in obj.items():
+        data[k] = dictToObj(v)
+    return data
