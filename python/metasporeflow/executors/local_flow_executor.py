@@ -13,12 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from online.online_executor import OnlineExecutor
 from .flow_executor import FlowExecutor
+from ..online.online_executor import OnlineLocalExecutor
+
 
 class LocalFlowExecutor(FlowExecutor):
     def __init__(self):
-        self.online_executor = OnlineExecutor(self._resources)
+        self.online_executor = OnlineLocalExecutor(self._resources)
 
     async def execute_up(self):
         print(self._resources)

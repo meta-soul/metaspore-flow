@@ -377,13 +377,9 @@ class OnlineGenerator(object):
 
 def get_demo_jpa_flow():
     dockers = dict()
-    dockers["mongo"] = DockerInfo("mongo:6.0.1", {
-        "MONGO_INITDB_ROOT_USERNAME": "root",
-        "MONGO_INITDB_ROOT_PASSWORD": "example"
-    })
     services = dict()
     services["mongo"] = ServiceInfo("192.168.0.22", 27017, "mongodb", ["jpa"], {
-        "uri": "mongodb://root:example@${MONGO_HOST:172.17.0.1}:${MONGO_PORT:27017}/jpa?authSource=admin",
+        "uri": "mongodb://jpa:Dmetasoul_123456@172.17.0.1:27017/jpa?authSource=jpa",
     })
     user = DataSource("amazonfashion_user_feature", "mongo", "jpa", [{"user_id": "str"},
                                                                      {"user_bhv_item_seq": "str"}])

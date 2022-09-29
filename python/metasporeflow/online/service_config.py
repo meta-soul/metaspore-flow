@@ -30,7 +30,7 @@ def get_source_option(online_config, name, collection):
         service.options = {}
     if service.kind.lower() == "mongodb":
         options["uri"] = service.options.setdefault("uri",
-                                                    "mongodb://jpa:Dmetasoul_123456@172.17.0.1:27017/jpa?authSource=jpa")
+                                                    "mongodb://root:example@${MONGO_HOST:172.17.0.1}:${MONGO_PORT:27017}/jpa?authSource=admin")
     return options
 
 

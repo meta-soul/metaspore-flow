@@ -15,9 +15,9 @@
 #
 import subprocess
 
-from cloud_consul import putServiceConfig
-from online_flow import OnlineFlow
-from online_generator import OnlineGenerator, get_demo_jpa_flow
+from .cloud_consul import putServiceConfig
+from .online_flow import OnlineFlow
+from .online_generator import OnlineGenerator, get_demo_jpa_flow
 
 
 def run_cmd(command):
@@ -25,7 +25,7 @@ def run_cmd(command):
     return ret.returncode
 
 
-class OnlineExecutor(object):
+class OnlineLocalExecutor(object):
     def __init__(self, resources):
         self._config = resources.find_by_type(OnlineFlow)
         self._generator = OnlineGenerator(configure=self._config)
@@ -63,5 +63,5 @@ class OnlineExecutor(object):
 
 if __name__ == "__main__":
     online = get_demo_jpa_flow()
-    executor = OnlineExecutor(online)
+    executor = OnlineLocalExecutor(online)
     executor.execute_up()
