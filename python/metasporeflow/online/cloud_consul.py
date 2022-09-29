@@ -21,16 +21,21 @@ class Consul(object):
         self._consul = consul.Consul(host, port, token=token)
 
     def setConfig(self, key, value):
-        self._consul.kv.put(key, value)
+        return self._consul.kv.put(key, value)
 
     def getConfig(self, key):
         index, data = self._consul.kv.get(key)
-        print(data['Value'])
+        return data['Value']
 
     def deletConfig(self, key):
         self._consul.kv.delete(key)
 
 
 def putServiceConfig(config, host="localhost", port=8500, prefix="config", context="recommend", data_key="data"):
-    Consul(host, port).setConfig("%s/%s/%s" % (prefix, context, data_key), config)
+    client = Consul(host, port)
+    key = "%s/%s/%s" % (prefix, context, data_key)
+    if client.setConfig(key, config) and client.getConfig(key):
+        print("set config to consul success!")
+    else:
+        print("set config to consul fail!")
 
