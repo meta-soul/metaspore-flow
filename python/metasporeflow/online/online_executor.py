@@ -13,9 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import random
 import subprocess
 import time
 
+from metasporeflow.online.check_service import checkRecommendService
 from .cloud_consul import putServiceConfig
 from .online_flow import OnlineFlow
 from .online_generator import OnlineGenerator, get_demo_jpa_flow
@@ -42,7 +44,15 @@ class OnlineLocalExecutor(object):
             time.sleep(1)
             online_recommend_config = self._generator.gen_server_config()
             putServiceConfig(online_recommend_config)
-            print("online flow up success!")
+            try_num = 10
+            while try_num > 0:
+                if checkRecommendService():
+                    print("online flow up success!")
+                    break
+                time.sleep(random.randint(1, 11))
+                try_num -= 1
+            if try_num <= 0:
+                print("online flow up not work!")
         else:
             print("online flow up fail!")
 
