@@ -17,7 +17,7 @@ from attrs import define
 from attrs import field
 from typing import Literal
 
-from .common import BaseDefaultConfig
+from .common import BaseDefaultConfig, dictToObj
 from urllib.parse import quote_plus
 
 
@@ -26,6 +26,7 @@ def get_source_option(online_config, name, collection):
     if not name or not online_config or name not in online_config.services:
         return options
     service = online_config.services.get(name)
+    service = dictToObj(service)
     if service.options is None:
         service.options = {}
     if service.kind.lower() == "mongodb":
