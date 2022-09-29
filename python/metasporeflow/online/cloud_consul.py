@@ -24,7 +24,10 @@ class Consul(object):
         self._consul = consul.Consul(host, port, token=token)
 
     def setConfig(self, key, value):
-        return self._consul.kv.put(key, value)
+        try:
+            return self._consul.kv.put(key, value)
+        except:
+            return False
 
     def getConfig(self, key):
         index, data = self._consul.kv.get(key)
@@ -46,4 +49,3 @@ def putServiceConfig(config, host="localhost", port=8500, prefix="config", conte
         num -= 1
     if num <= 0:
         print("set config to consul fail!")
-
