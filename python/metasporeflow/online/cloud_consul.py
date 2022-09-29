@@ -13,6 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import random
+import time
+
 import consul
 
 
@@ -34,8 +37,13 @@ class Consul(object):
 def putServiceConfig(config, host="localhost", port=8500, prefix="config", context="recommend", data_key="data"):
     client = Consul(host, port)
     key = "%s/%s/%s" % (prefix, context, data_key)
-    if client.setConfig(key, config) and client.getConfig(key):
-        print("set config to consul success!")
-    else:
+    num = 10
+    while num > 0:
+        if client.setConfig(key, config) and client.getConfig(key):
+            print("set config to consul success!")
+            break
+        time.sleep(random.randint(1, 10))
+        num -= 1
+    if num <= 0:
         print("set config to consul fail!")
 
