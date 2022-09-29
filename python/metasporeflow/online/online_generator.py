@@ -174,9 +174,9 @@ class OnlineGenerator(object):
         recall_experiments = list()
         if self.configure.random_models:
             model_info = self.configure.random_models[0]
+            model_info = dictToObj(model_info)
             if not model_info.name:
                 raise ValueError("random_model model name must not be empty")
-            model_info = dictToObj(model_info)
             key_name = "key"
             value_name = "value_list"
             append_source_table(feature_config, model_info.name, model_info.source,
