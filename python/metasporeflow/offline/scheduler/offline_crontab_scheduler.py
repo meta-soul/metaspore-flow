@@ -49,7 +49,6 @@ class OfflineCrontabScheduler(Scheduler):
         scheduler_time = 'SCHEDULER_TIME="`date --iso-8601=seconds`"' + "\n"
         cmd = self._generate_cmd()
         script_content = script_header + \
-            exec_path + \
             scheduler_time + \
             cmd
         return script_content
