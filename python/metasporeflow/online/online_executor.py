@@ -45,6 +45,7 @@ class OnlineLocalExecutor(object):
             time.sleep(random.randint(1, 11))
             online_recommend_config = self._generator.gen_server_config()
             putServiceConfig(online_recommend_config)
+            notifyRecommendService()
         else:
             print("online flow up fail!")
 

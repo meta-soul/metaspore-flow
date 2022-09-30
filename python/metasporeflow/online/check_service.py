@@ -1,10 +1,11 @@
 import requests
 
+def notifyRecommendService(host="127.0.0.1", port=9081):
+    resp = requests.post('http://%s:%s/actuator/refresh' % (host, port))
+    #data = resp.json()
+    #print(data)
 
-def checkRecommendService(host="127.0.0.1", port=9081):
-    try:
-        resp = requests.get('http://%s:%s/actuator/health/dataSource' % (host, port))
-        data = resp.json()
-        return data.get('status', "OUT_OF_SERVICE") == "UP"
-    except:
-        return False
+
+if __name__ == "__main__":
+    print("test")
+    notifyRecommendService()
