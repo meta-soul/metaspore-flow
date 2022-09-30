@@ -25,7 +25,7 @@ class Consul(object):
 
     def setConfig(self, key, value):
         try:
-            return self._consul.kv.put(key, value, None)
+            return self._consul.kv.put(key, value, 0)
         except:
             return False
 
