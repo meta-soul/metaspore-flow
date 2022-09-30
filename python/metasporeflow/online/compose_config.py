@@ -87,7 +87,7 @@ class OnlineDockerCompose(BaseDefaultConfig):
             service_kwargs["command"] = kwargs.setdefault("command", "java -jar recommend-service-1.0-SNAPSHOT.jar")
             service_kwargs["depends_on"] = kwargs.setdefault("depends_on", ["consul"])
         if name == "consul":
-            service_kwargs["ports"] = kwargs.setdefault("ports", [8500, 8600, 8300])
+            service_kwargs["ports"] = kwargs.setdefault("ports", [8500])
             service_kwargs["environment"] = {'CONSUL_LOCAL_CONFIG': r"{\"skip_leave_on_interrupt\": true}"}
             service_kwargs["environment"].update(kwargs.setdefault("environment", {}))
             service_kwargs["image"] = kwargs.setdefault("image", "consul:1.13.1")

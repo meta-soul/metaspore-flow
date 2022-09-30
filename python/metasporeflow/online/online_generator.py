@@ -170,6 +170,7 @@ class OnlineGenerator(object):
                                          fieldActions=user_profile_actions, output=[user_key, item_key, "item_score"])
         recall_services = list()
         recall_experiments = list()
+        random_recall_list = list()
         if self.configure.random_models:
             model_info = self.configure.random_models[0]
             model_info = dictToObj(model_info)
@@ -206,6 +207,7 @@ class OnlineGenerator(object):
                             types=["str", "str", "double", "map_str_double"],
                             func="recallCollectItem", input=["toItemScore.%s" % user_key, "item_score"]))
             algoTransform_name = "algotransform_%s" % model_info.name
+            random_recall_list.append(algoTransform_name)
             feature_config.add_algoTransform(name=algoTransform_name,
                                              taskName="ItemMatcher", feature=["feature_random"],
                                              options={"algo-name": model_info.name},
@@ -351,15 +353,21 @@ class OnlineGenerator(object):
                                                       {"score": "double"}, {"origin_scores": "map_str_double"}],
                                              tasks=[algoTransform_name], options={"maxReservation": 200})
                 experiment_name = "rank.%s" % model_info.name
-                recommend_config.add_experiment(name=experiment_name,
-                                                options={"maxReservation": 100}, chains=[
-                        Chain(then=[service_name], transforms=[
+                rank_transforms = [
                             TransformConfig(name="cutOff"),
                             TransformConfig(name="updateField", option={
                                 "input": ["score", "origin_scores"], "output": ["origin_scores"],
                                 "updateOperator": "putOriginScores"
                             })
-                        ])
+                        ]
+                if random_recall_list:
+                    rank_transforms.append(TransformConfig(name="additionalRecall", option={
+                                "recall_list": random_recall_list,
+                                "min_request": 10
+                            }))
+                recommend_config.add_experiment(name=experiment_name,
+                                                options={"maxReservation": 100}, chains=[
+                        Chain(then=[service_name], transforms=rank_transforms)
                     ])
                 rank_experiments.append(experiment_name)
         layers = []
