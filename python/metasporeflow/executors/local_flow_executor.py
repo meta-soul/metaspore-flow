@@ -36,18 +36,15 @@ class LocalFlowExecutor(FlowExecutor):
 
     async def execute_down(self):
         print(self._resources)
+        self.online_executor.execute_down()
         print('local flow down')
-        self.online_executor.execute_down()
-        self.online_executor.execute_down()
 
     async def execute_status(self):
         print(self._resources)
-        print('local flow status')
         self.online_executor.execute_status()
-        self.online_executor.execute_down()
+        print('local flow status')
 
     async def execute_reload(self):
         print(self._resources)
-        print('local flow reload')
         self.online_executor.execute_reload()
-        self.online_executor.execute_down()
+        print('local flow reload')
