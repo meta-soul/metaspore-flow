@@ -65,7 +65,7 @@ class OnlineGenerator(object):
         if self.configure.dockers:
             dockers.update(self.configure.dockers)
         if "recommend" not in dockers:
-            dockers["recommend"] = DockerInfo("swr.cn-southwest-2.myhuaweicloud.com/dmetasoul-repo/recommend-service-11:1.0", {})
+            dockers["recommend"] = DockerInfo("swr.cn-southwest-2.myhuaweicloud.com/dmetasoul-repo/recommend-service-11:1.0.1", {})
         no_mode_service = True
         for name in dockers.keys():
             if str(name).startswith("model"):
