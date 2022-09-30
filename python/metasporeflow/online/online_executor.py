@@ -17,10 +17,10 @@ import random
 import subprocess
 import time
 
-from metasporeflow.online.check_service import checkRecommendService
-from .cloud_consul import putServiceConfig
-from .online_flow import OnlineFlow
-from .online_generator import OnlineGenerator, get_demo_jpa_flow
+from metasporeflow.online.check_service import notifyRecommendService
+from metasporeflow.online.cloud_consul import putServiceConfig
+from metasporeflow.online.online_flow import OnlineFlow
+from metasporeflow.online.online_generator import OnlineGenerator, get_demo_jpa_flow
 
 
 def run_cmd(command):
