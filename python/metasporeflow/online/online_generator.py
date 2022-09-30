@@ -16,7 +16,7 @@
 import os
 
 from .cloud_consul import putServiceConfig
-from .common import DumpToYaml, dictToObj, setDefault
+from .common import DumpToYaml, dictToObj, setDefault, S
 from .compose_config import OnlineDockerCompose
 from .online_flow import OnlineFlow, ServiceInfo, DataSource, FeatureInfo, CFModelInfo, RankModelInfo, DockerInfo, \
     RandomModelInfo, CrossFeature
@@ -72,7 +72,7 @@ class OnlineGenerator(object):
                 no_mode_service = False
                 break
         if no_mode_service:
-            volume = "%s/volumes/output/model/ctr/nn/widedeep/model_export:/data/models" % os.getcwd()
+            volume = S("%s/volumes/output/model/ctr/nn/widedeep/model_export:/data/models" % os.getcwd())
             dockers["model"] = \
                 DockerInfo("swr.cn-southwest-2.myhuaweicloud.com/dmetasoul-public/metaspore-serving-release:cpu-v1.0.1",
                            {"volumes": [volume]})

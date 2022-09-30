@@ -27,11 +27,11 @@ class LocalFlowExecutor(FlowExecutor):
     async def execute_up(self):
         print(self._resources)
         print('-------------------------------')
-        self.offline_executor.execute_up()
-        print('offline local flow up')
-        print('-------------------------------')
         self.online_executor.execute_up()
         print('online local flow up')
+        print('-------------------------------')
+        self.offline_executor.execute_up()
+        print('offline local flow up')
         print('local flow up')
 
     async def execute_down(self):
