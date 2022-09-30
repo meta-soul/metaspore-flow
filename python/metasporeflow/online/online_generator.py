@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import os
+
 from .cloud_consul import putServiceConfig
 from .common import DumpToYaml, dictToObj, setDefault
 from .compose_config import OnlineDockerCompose
@@ -51,6 +53,10 @@ class OnlineGenerator(object):
         self.resource = kwargs.get("resource")
         if not self.resource or not isinstance(self.resource.data, OnlineFlow):
             raise ValueError("MetaSpore Online need input online configure data!")
+        self.local_resource = kwargs.get("local_resource")
+        if not self.local_resource or not self.local_resource.data:
+            raise ValueError("MetaSpore need input configure data!")
+        self.local_config = self.local_resource.data
         self.configure = self.resource.data
 
     def gen_docker_compose(self):
@@ -66,9 +72,10 @@ class OnlineGenerator(object):
                 no_mode_service = False
                 break
         if no_mode_service:
+            volume = "%s/volumes/output/model/ctr/nn/deepfm/model_export:/data/models" % os.getcwd()
             dockers["model"] = \
                 DockerInfo("swr.cn-southwest-2.myhuaweicloud.com/dmetasoul-public/metaspore-serving-release:cpu-v1.0.1",
-                           {})
+                           {"volumes": [volume]})
         for name, info in dockers.items():
             info = dictToObj(info)
             online_docker_compose.add_service(name, "container_%s_service" % name,

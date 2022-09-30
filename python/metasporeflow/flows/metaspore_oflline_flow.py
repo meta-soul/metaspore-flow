@@ -15,8 +15,27 @@
 #
 
 from attrs import frozen
+from typing import Tuple, Dict
 
 @frozen
-class MetaSporeFlow:
-    # TODO: demo
-    sharedVolumeInContainer: str
+class OfflineLocalFlow:
+    offlineLocalImage: str
+    offlineLocalContainerName: str
+
+@frozen
+class OfflineScheduler:
+    cronExpr: str
+    dag: Dict[str, Tuple[str,...]]
+
+@frozen
+class OfflineCrontabScheduler(OfflineScheduler):
+    pass
+
+@frozen
+class OfflineTask:
+    scriptPath: str
+    configPath: str
+
+@frozen
+class OfflinePythonTask(OfflineTask):
+    pass

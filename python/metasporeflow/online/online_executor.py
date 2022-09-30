@@ -31,8 +31,9 @@ def run_cmd(command):
 
 class OnlineLocalExecutor(object):
     def __init__(self, resources):
-        self._resource = resources.find_by_type(OnlineFlow)
-        self._generator = OnlineGenerator(resource=self._resource)
+        self._local_resource = resources.find_by_name("demo_metaspore_flow")
+        self._online_resource = resources.find_by_name("online_local_flow")
+        self._generator = OnlineGenerator(resource=self._resource, local_resource=self._local_resource)
 
     def execute_up(self, **kwargs):
         docker_compose_yaml = kwargs.setdefault("docker_compose_file", "docker-compose.yml")

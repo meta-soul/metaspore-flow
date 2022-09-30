@@ -13,31 +13,41 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from metasporeflow.online.online_executor import OnlineLocalExecutor
+from metasporeflow.offline.local_offline_executor import LocalOfflineFlowExecutor
 from .flow_executor import FlowExecutor
-from ..online.online_executor import OnlineLocalExecutor
-
+import asyncio
 
 class LocalFlowExecutor(FlowExecutor):
     def __init__(self, resources):
         super(LocalFlowExecutor, self).__init__(resources)
+        self.offline_executor = LocalOfflineFlowExecutor(self._resources)
         self.online_executor = OnlineLocalExecutor(self._resources)
 
     async def execute_up(self):
         print(self._resources)
-        print('local flow up')
+        print('-------------------------------')
+        self.offline_executor.execute_up()
+        print('offline local flow up')
+        print('-------------------------------')
         self.online_executor.execute_up()
+        print('online local flow up')
+        print('local flow up')
 
     async def execute_down(self):
         print(self._resources)
         print('local flow down')
+        self.online_executor.execute_down()
         self.online_executor.execute_down()
 
     async def execute_status(self):
         print(self._resources)
         print('local flow status')
         self.online_executor.execute_status()
+        self.online_executor.execute_down()
 
     async def execute_reload(self):
         print(self._resources)
         print('local flow reload')
         self.online_executor.execute_reload()
+        self.online_executor.execute_down()

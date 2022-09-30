@@ -13,8 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from ..online.online_flow import OnlineFlow
-
 
 class FlowLoader(object):
     _NAMESPACE = 'metaspore'
@@ -28,10 +26,22 @@ class FlowLoader(object):
 
     @classmethod
     def _get_resource_types(cls):
+        from metasporeflow.online.online_flow import OnlineFlow
         from .metaspore_flow import MetaSporeFlow
+        from metasporeflow.flows.metaspore_oflline_flow import \
+            OfflineScheduler, \
+            OfflineCrontabScheduler, \
+            OfflineTask, \
+            OfflinePythonTask, \
+            OfflineLocalFlow
         resource_types = (
             MetaSporeFlow,
             OnlineFlow,
+            OfflineScheduler,
+            OfflineCrontabScheduler,
+            OfflineTask,
+            OfflinePythonTask,
+            OfflineLocalFlow,
         )
         return resource_types
 

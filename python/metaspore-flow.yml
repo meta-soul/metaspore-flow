@@ -4,6 +4,9 @@ metadata:
     name: demo_metaspore_flow
     uses:
       - ./online_local_flow.yml
+      - ./crontab_scheduler.yml
+      - ./sync_data.yml
+      - ./join_data_1.yml
 spec:
     input_table_name: input
     output_table_name: output
