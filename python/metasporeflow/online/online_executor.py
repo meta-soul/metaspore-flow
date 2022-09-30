@@ -40,20 +40,12 @@ class OnlineLocalExecutor(object):
         docker_compose = open(docker_compose_yaml, "w")
         docker_compose.write(compose_content)
         docker_compose.close()
-        try_num = 10
-        while try_num > 0:
-            if run_cmd(["docker-compose -f %s up -d" % docker_compose_yaml]) == 0:
-                time.sleep(1)
-                online_recommend_config = self._generator.gen_server_config()
-                putServiceConfig(online_recommend_config)
-                if checkRecommendService():
-                    print("online flow up success!")
-                    break
-                else:
-                    run_cmd(["docker-compose down"])
+        if run_cmd(["docker-compose -f %s up -d" % docker_compose_yaml]) == 0:
+            time.sleep(2)
+            online_recommend_config = self._generator.gen_server_config()
+            putServiceConfig(online_recommend_config)
             time.sleep(random.randint(1, 11))
-            try_num -= 1
-        if try_num <= 0:
+        else:
             print("online flow up fail!")
 
     def execute_down(self, **kwargs):
