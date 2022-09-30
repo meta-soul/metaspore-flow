@@ -72,14 +72,18 @@ class OnlineGenerator(object):
                 no_mode_service = False
                 break
         if no_mode_service:
-            volume = S("%s/volumes/output/model/ctr/nn/widedeep/model_export:/data/models" % os.getcwd())
+
             dockers["model"] = \
                 DockerInfo("swr.cn-southwest-2.myhuaweicloud.com/dmetasoul-public/metaspore-serving-release:cpu-v1.0.1",
-                           {"volumes": [volume]})
+                           {})
         for name, info in dockers.items():
             info = dictToObj(info)
+            volumes = []
+            if str(name).startswith("model"):
+                volumes.append("%s/volumes/output/model/ctr/nn/widedeep/model_export:/data/models" % os.getcwd())
             online_docker_compose.add_service(name, "container_%s_service" % name,
-                                              image=info.image, environment=info.environment)
+                                              image=info.image, environment=info.environment,
+                                              volumes=volumes)
         online_recommend_service = online_docker_compose.services.get("recommend")
         if not online_recommend_service:
             raise ValueError("container_recommend_service init fail!")
