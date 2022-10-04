@@ -65,7 +65,7 @@ class OnlineGenerator(object):
         if self.configure.dockers:
             dockers.update(self.configure.dockers)
         if "recommend" not in dockers:
-            dockers["recommend"] = DockerInfo("swr.cn-southwest-2.myhuaweicloud.com/dmetasoul-repo/recommend-service-11:1.0", {})
+            dockers["recommend"] = DockerInfo("swr.cn-southwest-2.myhuaweicloud.com/dmetasoul-repo/recommend-service-11:1.0.6", {})
         no_mode_service = True
         for name in dockers.keys():
             if str(name).startswith("model"):
@@ -139,7 +139,7 @@ class OnlineGenerator(object):
 
         user_fields = list()
         user_key_type = "str"
-        user_key_action = FieldAction(names=[user_key], types=["str"], fields=[user_key], func="typeTransform", )
+        user_key_action = FieldAction(names=["typeTransform.%s" % user_key], types=["str"], fields=[user_key], func="typeTransform", )
         for field_item in feature_info.user.columns:
             user_fields.extend(field_item.keys())
             if user_key in field_item:
@@ -175,8 +175,8 @@ class OnlineGenerator(object):
         user_profile_actions.append(FieldAction(names=["item_ids"], types=["list_str"],
                                                 options={"splitor": feature_info.user_item_ids_split or "\u0001"},
                                                 func="splitRecentIds", fields=[items_key]))
-        user_profile_actions.append(FieldAction(names=[item_key, "item_score"], types=["str", "double"],
-                                                func="recentWeight", input=["item_ids"]))
+        user_profile_actions.append(FieldAction(names=[user_key, item_key, "item_score"], types=["str", "str", "double"],
+                                                func="recentWeight", input=["typeTransform.%s" % user_key, "item_ids"]))
         feature_config.add_algoTransform(name="algotransform_user", taskName="UserProfile", feature=["feature_user"],
                                          fieldActions=user_profile_actions, output=[user_key, item_key, "item_score"])
         recall_services = list()

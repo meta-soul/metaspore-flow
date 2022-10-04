@@ -24,6 +24,7 @@ from .online_generator import OnlineGenerator, get_demo_jpa_flow
 
 
 def run_cmd(command):
+    return 0
     ret = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8")
     print(ret)
     return ret.returncode

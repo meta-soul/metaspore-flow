@@ -83,7 +83,7 @@ class OnlineDockerCompose(BaseDefaultConfig):
         service_kwargs.update(kwargs)
         if name == "recommend":
             service_kwargs["ports"] = kwargs.setdefault("ports", [9081])
-            service_kwargs["image"] = kwargs.setdefault("image", "swr.cn-southwest-2.myhuaweicloud.com/dmetasoul-repo/recommend-service-11:1.0.0")
+            service_kwargs["image"] = kwargs.setdefault("image", "swr.cn-southwest-2.myhuaweicloud.com/dmetasoul-repo/recommend-service-11:1.0.6")
             service_kwargs["command"] = kwargs.setdefault("command", "java -jar recommend-service-1.0-SNAPSHOT.jar")
             service_kwargs["depends_on"] = kwargs.setdefault("depends_on", ["consul"])
         if name == "consul":
