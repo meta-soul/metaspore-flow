@@ -14,7 +14,6 @@
 # limitations under the License.
 #
 import os
-
 from .cloud_consul import putServiceConfig
 from .common import DumpToYaml, dictToObj, setDefault, S
 from .compose_config import OnlineDockerCompose
@@ -72,7 +71,6 @@ class OnlineGenerator(object):
                 no_mode_service = False
                 break
         if no_mode_service:
-
             dockers["model"] = \
                 DockerInfo("swr.cn-southwest-2.myhuaweicloud.com/dmetasoul-public/metaspore-serving-release:cpu-v1.0.1",
                            {})
@@ -82,8 +80,7 @@ class OnlineGenerator(object):
             if str(name).startswith("model"):
                 volumes.append("%s/volumes/output/model/ctr/nn/widedeep/model_export:/data/models" % os.getcwd())
             online_docker_compose.add_service(name, "container_%s_service" % name,
-                                              image=info.image, environment=info.environment,
-                                              volumes=volumes)
+                                              image=info.image, environment=info.environment, volumes=volumes)
         online_recommend_service = online_docker_compose.services.get("recommend")
         if not online_recommend_service:
             raise ValueError("container_recommend_service init fail!")
@@ -166,21 +163,35 @@ class OnlineGenerator(object):
                                    select=["source_table_user.%s" % field for field in user_fields],
                                    condition=[Condition(left="source_table_request.%s" % user_key, type="left",
                                                         right="source_table_user.%s" % user_key)])
-        feature_config.add_feature(name="feature_item_summary",
-                                   depend=["source_table_request", "source_table_summary"],
+        feature_config.add_feature(name="feature_item_summary", depend=["source_table_request", "source_table_summary"],
                                    select=["source_table_summary.%s" % field for field in summary_fields],
                                    condition=[Condition(left="source_table_request.%s" % item_key, type="left",
+                                                        right="source_table_summary.%s" % item_key)])
+        iteminfo_service_name = "iteminfo_summary"
+        feature_iteminfo_name = "feature_itemInfo_summary"
+        iteminfo_columns = [{user_key: user_key_type}, {item_key: item_key_type}, {"score": "double"}, {"origin_scores": "map_str_double"}]
+        recommend_config.add_service(name=iteminfo_service_name,
+                                     preTransforms=[TransformConfig(name="summary")],
+                                     columns=iteminfo_columns,
+                                     tasks=[feature_iteminfo_name], options={"maxReservation": 200})
+        summary_select = ["source_table_summary.%s" % field for field in summary_fields]
+        for field_item in iteminfo_columns:
+            summary_select.extend(["%s.%s" % (iteminfo_service_name, field) for field in field_item.keys() if field != user_key and field != item_key])
+        feature_config.add_feature(name=feature_iteminfo_name, depend=[iteminfo_service_name, "source_table_summary"],
+                                   select=summary_select,
+                                   condition=[Condition(left="%s.%s" % (iteminfo_service_name, item_key), type="left",
                                                         right="source_table_summary.%s" % item_key)])
         user_profile_actions = list([user_key_action, ])
         user_profile_actions.append(FieldAction(names=["item_ids"], types=["list_str"],
                                                 options={"splitor": feature_info.user_item_ids_split or "\u0001"},
                                                 func="splitRecentIds", fields=[items_key]))
-        user_profile_actions.append(FieldAction(names=[user_key, item_key, "item_score"], types=["str", "str", "double"],
+        user_profile_actions.append(FieldAction(names=[user_key, item_key, "item_score"], types=[user_key_type, item_key_type, "double"],
                                                 func="recentWeight", input=["typeTransform.%s" % user_key, "item_ids"]))
         feature_config.add_algoTransform(name="algotransform_user", taskName="UserProfile", feature=["feature_user"],
                                          fieldActions=user_profile_actions, output=[user_key, item_key, "item_score"])
         recall_services = list()
         recall_experiments = list()
+        related_recall_experiments = list()
         random_recall_list = list()
         if self.configure.random_models:
             model_info = self.configure.random_models[0]
@@ -239,6 +250,7 @@ class OnlineGenerator(object):
                     ])
                 ])
             recall_experiments.append(experiment_name)
+            related_recall_experiments.append(experiment_name)
             recall_services.append(service_name)
         if self.configure.cf_models:
             for model_info in self.configure.cf_models:
@@ -247,25 +259,48 @@ class OnlineGenerator(object):
                     raise ValueError("cf_models model name must not be empty")
                 append_source_table(feature_config, model_info.name, model_info.source,
                                     [{"key": "str"}, {"value": {"list_struct": {"_1": "str", "_2": "double"}}}])
-                feature_name = "feature_%s" % model_info.name
+                feature_name = "feature_{}".format(model_info.name)
                 feature_config.add_feature(name=feature_name, depend=["algotransform_user", model_info.name],
                                            select=["algotransform_user.%s" % user_key, "algotransform_user.item_score",
                                                    "%s.value" % model_info.name],
                                            condition=[Condition(left="algotransform_user.%s" % item_key, type="left",
                                                                 right="%s.key" % model_info.name)])
+                related_feature_name = "feature_related_{}".format(model_info.name)
+                feature_config.add_feature(name=related_feature_name, depend=["source_table_request", model_info.name],
+                                           select=["source_table_request.%s" % user_key,
+                                                   "%s.value" % model_info.name],
+                                           condition=[Condition(left="source_table_request.%s" % item_key, type="left",
+                                                                right="%s.key" % model_info.name)])
                 field_actions = list()
-                field_actions.append(FieldAction(names=["toItemScore.%s" % user_key, "item_score"],
+                field_actions.append(FieldAction(names=["toItemScore.{}".format(user_key), "item_score"],
                                                  types=["str", "map_str_double"],
                                                  func="toItemScore", fields=[user_key, "value", "item_score"]))
                 field_actions.append(
                     FieldAction(names=[user_key, item_key, "score", "origin_scores"],
                                 types=["str", "str", "double", "map_str_double"],
-                                func="recallCollectItem", input=["toItemScore.%s" % user_key, "item_score"]))
+                                func="recallCollectItem", input=["toItemScore.{}".format(user_key), "item_score"]))
                 algoTransform_name = "algotransform_%s" % model_info.name
                 feature_config.add_algoTransform(name=algoTransform_name,
                                                  taskName="ItemMatcher", feature=[feature_name],
                                                  options={"algo-name": model_info.name},
                                                  fieldActions=field_actions,
+                                                 output=[user_key, item_key, "score", "origin_scores"])
+                related_field_actions = list()
+                related_field_actions.append(FieldAction(names=["toItemScore.{}".format(user_key), "item_score"],
+                                                 types=["str", "map_str_double"], input=["setValue.item_score"],
+                                                 func="toItemScore", fields=[user_key, "value"]))
+                related_field_actions.append(
+                    FieldAction(names=[user_key, item_key, "score", "origin_scores"],
+                                types=["str", "str", "double", "map_str_double"],
+                                func="recallCollectItem", input=["toItemScore.{}".format(user_key), "item_score"]))
+                related_field_actions.append(FieldAction(names=["setValue.item_score"], types=["double"],
+                                                                       func="setValue",
+                                                                       options={"value": 1.0}))
+                related_algoTransform_name = "algotransform_related_%s" % model_info.name
+                feature_config.add_algoTransform(name=related_algoTransform_name,
+                                                 taskName="ItemMatcher", feature=[related_feature_name],
+                                                 options={"algo-name": model_info.name},
+                                                 fieldActions=related_field_actions,
                                                  output=[user_key, item_key, "score", "origin_scores"])
                 service_name = "recall_%s" % model_info.name
                 recommend_config.add_service(name=service_name, tasks=[algoTransform_name],
@@ -283,6 +318,21 @@ class OnlineGenerator(object):
                     ])
                 recall_experiments.append(experiment_name)
                 recall_services.append(service_name)
+                related_service_name = "recall_related_%s" % model_info.name
+                recommend_config.add_service(name=related_service_name, tasks=[related_algoTransform_name],
+                                             options={"maxReservation": 200})
+                related_experiment_name = "recall_related.%s" % model_info.name
+                recommend_config.add_experiment(name=related_experiment_name,
+                                                options={"maxReservation": 100}, chains=[
+                        Chain(then=[related_service_name], transforms=[
+                            TransformConfig(name="cutOff"),
+                            TransformConfig(name="updateField", option={
+                                "input": ["score", "origin_scores"], "output": ["origin_scores"],
+                                "updateOperator": "putOriginScores"
+                            })
+                        ])
+                    ])
+                related_recall_experiments.append(related_experiment_name)
         if len(recall_services) > 1:
             recommend_config.add_experiment(name="recall.multiple", options={"maxReservation": 100}, chains=[
                 Chain(when=recall_services, transforms=[
@@ -364,38 +414,52 @@ class OnlineGenerator(object):
                                                       {"score": "double"}, {"origin_scores": "map_str_double"}],
                                              tasks=[algoTransform_name], options={"maxReservation": 200})
                 experiment_name = "rank.%s" % model_info.name
-                rank_transforms = [
-                            TransformConfig(name="cutOff"),
+                recommend_config.add_experiment(name=experiment_name,
+                                                options={"maxReservation": 100}, chains=[
+                        Chain(then=[service_name], transforms=[
+                            TransformConfig(name="cutOff", option={
+                                "dupFields": [user_key, item_key],
+                            }),
                             TransformConfig(name="updateField", option={
                                 "input": ["score", "origin_scores"], "output": ["origin_scores"],
                                 "updateOperator": "putOriginScores"
-                            })
-                        ]
-                if random_recall_list:
-                    rank_transforms.append(TransformConfig(name="additionalRecall", option={
+                            }),
+                            TransformConfig(name="additionalRecall", option={
                                 "recall_list": random_recall_list,
                                 "min_request": 10
-                            }))
-                recommend_config.add_experiment(name=experiment_name,
-                                                options={"maxReservation": 100}, chains=[
-                        Chain(then=[service_name], transforms=rank_transforms)
+                            }),
+                            TransformConfig(name="addItemInfo", option={
+                                "service_name": iteminfo_service_name,
+                            }),
+                        ])
                     ])
                 rank_experiments.append(experiment_name)
         layers = []
+        related_layers = []
         if recall_experiments:
             layer_name = "recall"
             recommend_config.add_layer(name=layer_name, bucketizer="random", experiments=[
                 ExperimentItem(name=name, ratio=1.0 / len(recall_experiments)) for name in recall_experiments
             ])
             layers.append(layer_name)
+        if related_recall_experiments:
+            layer_name = "related_recall"
+            recommend_config.add_layer(name=layer_name, bucketizer="random", experiments=[
+                ExperimentItem(name=name, ratio=1.0 / len(related_recall_experiments)) for name in related_recall_experiments
+            ])
+            related_layers.append(layer_name)
         if recall_experiments:
             layer_name = "rank"
             recommend_config.add_layer(name=layer_name, bucketizer="random", experiments=[
                 ExperimentItem(name=name, ratio=1.0 / len(rank_experiments)) for name in rank_experiments
             ])
             layers.append(layer_name)
+            related_layers.append(layer_name)
         recommend_config.add_scene(name="guess-you-like", chains=[
             Chain(then=layers)],
+                                   columns=[{user_key: user_key_type}, {item_key: item_key_type}])
+        recommend_config.add_scene(name="looked-and-looked", chains=[
+            Chain(then=related_layers)],
                                    columns=[{user_key: user_key_type}, {item_key: item_key_type}])
         online_configure = OnlineServiceConfig(feature_config, recommend_config)
         return DumpToYaml(online_configure).encode("utf-8").decode("latin1")
@@ -405,7 +469,6 @@ def get_demo_jpa_flow():
     dockers = dict()
     services = dict()
     services["mongo"] = ServiceInfo("192.168.0.22", 27017, "mongodb", ["jpa"], {
-        "uri": "mongodb://jpa:Dmetasoul_123456@172.17.0.1:27017/jpa?authSource=jpa",
     })
     user = DataSource("amazonfashion_user_feature", "mongo", "jpa", [{"user_id": "str"},
                                                                      {"user_bhv_item_seq": "str"}])
