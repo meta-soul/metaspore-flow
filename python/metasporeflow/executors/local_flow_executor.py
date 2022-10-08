@@ -38,6 +38,8 @@ class LocalFlowExecutor(FlowExecutor):
         print(self._resources)
         self.online_executor.execute_down()
         print('local flow down')
+        self.offline_executor.execute_down()
+        print('offline local flow down success!')
 
     async def execute_status(self):
         print(self._resources)

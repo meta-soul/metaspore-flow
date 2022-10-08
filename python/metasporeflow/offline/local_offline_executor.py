@@ -31,6 +31,10 @@ class LocalOfflineFlowExecutor():
         self._init_local_container()
         self._schedulers.start()
 
+    def execute_down(self):
+        self._stop_local_container()
+        self._remove_local_container()
+
     def _get_tasks(self, tasks_conf) -> Dict[str, Task]:
         return self.Tasks(tasks_conf).get_tasks()
 
@@ -63,6 +67,16 @@ class LocalOfflineFlowExecutor():
         res = subprocess.run(cmd, shell=True, check=True,
                              capture_output=True, text=True)
         return res.stdout.strip() == "true"
+
+    def _stop_local_container(self):
+        cmd = "docker stop %s" % self.offline_local_container_name
+        subprocess.run(cmd, shell=True)
+
+    def _remove_local_container(self):
+        if self._is_local_offline_container_active():
+            self._stop_local_container()
+        cmd = "docker rm %s" % self.offline_local_container_name
+        subprocess.run(cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     class Schedulers:
 
