@@ -25,8 +25,10 @@ class Consul(object):
 
     def setConfig(self, key, value):
         try:
-            return self._consul.kv.put(key, value, 0)
-        except:
+            return self._consul.kv.put(key, value, None)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
             return False
 
     def getConfig(self, key):
@@ -40,12 +42,7 @@ class Consul(object):
 def putServiceConfig(config, host="localhost", port=8500, prefix="config", context="recommend", data_key="data"):
     client = Consul(host, port)
     key = "%s/%s/%s" % (prefix, context, data_key)
-    num = 10
-    while num > 0:
-        if client.setConfig(key, config) and client.getConfig(key):
-            print("set config to consul success!")
-            break
-        time.sleep(random.randint(1, 10))
-        num -= 1
-    if num <= 0:
+    if client.setConfig(key, config):
+        print("set config to consul success!")
+    else:
         print("set config to consul fail!")
