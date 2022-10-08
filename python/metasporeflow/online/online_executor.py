@@ -49,6 +49,9 @@ class OnlineLocalExecutor(object):
             notifyRecommendService()
         else:
             print("online flow up fail!")
+        time.sleep(random.randint(1, 11))
+        notifyRecommendService()
+        notifyRecommendService()
 
     def execute_down(self, **kwargs):
         if run_cmd(["docker-compose -f %s down" % self._docker_compose_file]) == 0:
