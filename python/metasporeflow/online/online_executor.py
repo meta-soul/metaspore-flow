@@ -16,6 +16,7 @@
 import random
 import subprocess
 import time
+import os
 
 from metasporeflow.online.check_service import notifyRecommendService
 from metasporeflow.online.cloud_consul import putServiceConfig
@@ -34,14 +35,14 @@ class OnlineLocalExecutor(object):
         self._local_resource = resources.find_by_name("demo_metaspore_flow")
         self._online_resource = resources.find_by_name("online_local_flow")
         self._generator = OnlineGenerator(resource=self._online_resource, local_resource=self._local_resource)
+        self._docker_compose_file = "%s/docker-compose.yml" % os.getcwd()
 
     def execute_up(self, **kwargs):
-        docker_compose_yaml = kwargs.setdefault("docker_compose_file", "docker-compose.yml")
         compose_content = self._generator.gen_docker_compose()
-        docker_compose = open(docker_compose_yaml, "w")
+        docker_compose = open(self._docker_compose_file, "w")
         docker_compose.write(compose_content)
         docker_compose.close()
-        if run_cmd(["docker-compose -f %s up -d" % docker_compose_yaml]) == 0:
+        if run_cmd(["docker-compose -f %s up -d" % self._docker_compose_file]) == 0:
             time.sleep(random.randint(1, 11))
             online_recommend_config = self._generator.gen_server_config()
             putServiceConfig(online_recommend_config)
@@ -50,7 +51,7 @@ class OnlineLocalExecutor(object):
             print("online flow up fail!")
 
     def execute_down(self, **kwargs):
-        if run_cmd(["docker-compose down"]) == 0:
+        if run_cmd(["docker-compose -f %s down" % self._docker_compose_file]) == 0:
             print("online flow down success!")
         else:
             print("online flow down fail!")

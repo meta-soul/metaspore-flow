@@ -64,7 +64,7 @@ class OnlineGenerator(object):
         if self.configure.dockers:
             dockers.update(self.configure.dockers)
         if "recommend" not in dockers:
-            dockers["recommend"] = DockerInfo("swr.cn-southwest-2.myhuaweicloud.com/dmetasoul-repo/recommend-service-11:1.0.12", {})
+            dockers["recommend"] = DockerInfo("swr.cn-southwest-2.myhuaweicloud.com/dmetasoul-repo/recommend-service-11:1.0.14", {})
         no_mode_service = True
         for name in dockers.keys():
             if str(name).startswith("model"):
@@ -419,6 +419,8 @@ class OnlineGenerator(object):
                         Chain(then=[service_name], transforms=[
                             TransformConfig(name="cutOff", option={
                                 "dupFields": [user_key, item_key],
+                                "or_filter_data": "source_table_request",
+                                "or_field_list": [item_key],
                             }),
                             TransformConfig(name="updateField", option={
                                 "input": ["score", "origin_scores"], "output": ["origin_scores"],

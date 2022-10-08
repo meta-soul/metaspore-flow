@@ -1,6 +1,6 @@
 import requests
 
-def notifyRecommendService(host="127.0.0.1", port=9081):
+def notifyRecommendService(host="127.0.0.1", port=8081):
     resp = requests.post('http://%s:%s/actuator/refresh' % (host, port))
     #data = resp.json()
     #print(data)
