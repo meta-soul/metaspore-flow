@@ -21,7 +21,7 @@ import asyncio
 class LocalFlowExecutor(FlowExecutor):
     def __init__(self, resources):
         super(LocalFlowExecutor, self).__init__(resources)
-        #self.offline_executor = LocalOfflineFlowExecutor(self._resources)
+        self.offline_executor = LocalOfflineFlowExecutor(self._resources)
         self.online_executor = OnlineLocalExecutor(self._resources)
 
     async def execute_up(self):
@@ -30,7 +30,7 @@ class LocalFlowExecutor(FlowExecutor):
         self.online_executor.execute_up()
         print('online local flow up')
         print('-------------------------------')
-        #self.offline_executor.execute_up()
+        self.offline_executor.execute_up()
         print('offline local flow up')
         print('local flow up')
 
