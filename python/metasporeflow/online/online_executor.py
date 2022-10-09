@@ -43,9 +43,10 @@ class OnlineLocalExecutor(object):
         docker_compose.write(compose_content)
         docker_compose.close()
         if run_cmd(["docker-compose -f %s up -d" % self._docker_compose_file]) == 0:
-            time.sleep(random.randint(1, 11))
+            time.sleep(11)
             online_recommend_config = self._generator.gen_server_config()
             putServiceConfig(online_recommend_config)
+            time.sleep(11)
             notifyRecommendService()
         else:
             print("online flow up fail!")
