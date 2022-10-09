@@ -26,9 +26,7 @@ class Consul(object):
     def setConfig(self, key, value):
         try:
             return self._consul.kv.put(key, value, None)
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
+        except:
             return False
 
     def getConfig(self, key):
@@ -48,3 +46,6 @@ def putServiceConfig(config, host="localhost", port=8500, prefix="config", conte
         time.sleep(1)
         num -= 1
     print("set config to consul success!")
+
+if __name__=="__main__":
+    putServiceConfig("test", "localhost", 8500, "test")
