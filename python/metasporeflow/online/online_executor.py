@@ -22,6 +22,7 @@ from metasporeflow.online.check_service import notifyRecommendService
 from metasporeflow.online.cloud_consul import putServiceConfig
 from metasporeflow.online.online_flow import OnlineFlow
 from metasporeflow.online.online_generator import OnlineGenerator, get_demo_jpa_flow
+from metasporeflow.online.common import DumpToYaml
 
 
 def run_cmd(command):
@@ -29,6 +30,21 @@ def run_cmd(command):
     print(ret)
     return ret.returncode
 
+def is_container_active(container_name):
+    cmd = "echo $( docker container inspect -f '{{.State.Running}}' %s )" % container_name
+    res = subprocess.run(cmd, shell=True, check=True,
+                         capture_output=True, text=True)
+    return res.stdout.strip() == "true"
+
+def stop_local_container(container_name):
+    cmd = "docker stop %s" % container_name
+    subprocess.run(cmd, shell=True)
+
+def remove_local_container(container_name):
+    if is_container_active(container_name):
+        stop_local_container(container_name)
+    cmd = "docker rm %s" % container_name
+    subprocess.run(cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 class OnlineLocalExecutor(object):
     def __init__(self, resources):
@@ -38,21 +54,25 @@ class OnlineLocalExecutor(object):
         self._docker_compose_file = "%s/docker-compose.yml" % os.getcwd()
 
     def execute_up(self, **kwargs):
-        compose_content = self._generator.gen_docker_compose()
+        compose_info = self._generator.gen_docker_compose()
         docker_compose = open(self._docker_compose_file, "w")
-        docker_compose.write(compose_content)
+        docker_compose.write(DumpToYaml(compose_info))
         docker_compose.close()
+        consul_container_name = compose_info.services["consul"].container_name
+        recommend_container_name = compose_info.services["recommend"].container_name
         if run_cmd(["docker-compose -f %s up -d" % self._docker_compose_file]) == 0:
-            time.sleep(11)
+            while not is_container_active(consul_container_name):
+                print("wait consul start...")
+                time.sleep(1)
             online_recommend_config = self._generator.gen_server_config()
             putServiceConfig(online_recommend_config)
-            time.sleep(11)
+            time.sleep(3)
+            while not is_container_active(recommend_container_name):
+                print("wait recommend start...")
+                time.sleep(1)
             notifyRecommendService()
         else:
             print("online flow up fail!")
-        time.sleep(random.randint(1, 11))
-        notifyRecommendService()
-        notifyRecommendService()
 
     def execute_down(self, **kwargs):
         if run_cmd(["docker-compose -f %s down" % self._docker_compose_file]) == 0:

@@ -42,7 +42,9 @@ class Consul(object):
 def putServiceConfig(config, host="localhost", port=8500, prefix="config", context="recommend", data_key="data"):
     client = Consul(host, port)
     key = "%s/%s/%s" % (prefix, context, data_key)
-    if client.setConfig(key, config):
-        print("set config to consul success!")
-    else:
-        print("set config to consul fail!")
+    num = 14
+    while num > 0 and not client.setConfig(key, config):
+        print("wait set config to consul!")
+        time.sleep(1)
+        num -= 1
+    print("set config to consul success!")

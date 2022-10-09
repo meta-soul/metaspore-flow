@@ -91,7 +91,7 @@ class OnlineGenerator(object):
                     continue
                 online_recommend_service.add_env("%s_HOST" % name.upper(), name)
                 online_recommend_service.add_env("%s_PORT" % name.upper(), service.ports[0])
-        return DumpToYaml(online_docker_compose)
+        return online_docker_compose
 
     def gen_server_config(self):
         feature_config = FeatureConfig(source=[Source(name="request"), ])
